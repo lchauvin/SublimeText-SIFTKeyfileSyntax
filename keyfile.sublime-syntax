@@ -1,0 +1,78 @@
+%YAML 1.2
+---
+
+name: Keyfile
+
+# See http://www.sublimetext.com/docs/3/syntax.html
+file_extensions:
+  - key
+scope: source.example-c
+
+#variable.function.example-c                    # Blue
+#constant.language                              # Red
+#constant.character.example-c                   # Purple
+#punctuation.definition.variable.example-c      # Blue/Green
+#constant.numeric.value.example-c               # Orange
+#string.example-c                               # Green
+#invalid.illegal.numeric.suffix.c               # White/Red Bg
+#comment.block.documentation.example-c          # Grey
+
+contexts:
+  # The prototype context is prepended to all contexts but those setting
+  # meta_include_prototype: false.
+  prototype:
+    - include: comments
+
+  main:
+    # The main context is the initial starting point of our syntax.
+    # Include other contexts from here (or specify them directly).
+    - include: strings
+    - include: description
+    - include: feature
+    - include: keypoint
+
+  feature:
+    - match: '^(?:Features: )([0-9]*)'
+      captures:
+        1: constant.language
+
+  description:
+    - match: '^(Scale-space.*$)'
+      captures:
+        1: comment.block.documentation.example-c
+
+  keypoint:
+    - match: '^(([^\t]*\t){3})(([^\t]*\t){1})(([^\t]*\t){9})(([^\t]*\t){3})(([^\t]*){1})(.*$)'
+      captures:
+        1: variable.function.example-c                       # Location
+        3: punctuation.definition.variable.example-c         # Scale
+        5: constant.numeric.value.example-c                  # Eigenvector
+        7: constant.language                                 # Eigenvalues
+        9: invalid.illegal.numeric.suffix.c                  # Info Flag
+        11: string.example-c                                 # Descriptor
+
+  strings:
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character.
+    - match: '"'
+      scope: punctuation.definition.string.begin.example-c
+      push: inside_string
+
+  inside_string:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.example-c
+    - match: '\.'
+      scope: constant.character.escape.example-c
+    - match: '"'
+      scope: punctuation.definition.string.end.example-c
+      pop: true
+
+  comments:
+    # Comments begin with a '//' and finish at the end of the line.
+    - match: '#'
+      scope: punctuation.definition.comment.example-c
+      push:
+        # This is an anonymous context push for brevity.
+        - meta_scope: comment.line.double-slash.example-c
+        - match: $\n?
+          pop: true
